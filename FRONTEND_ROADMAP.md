@@ -1,0 +1,96 @@
+# Frontend Development Roadmap
+
+This document outlines the development plan for the Future Self Flutter application, covering UI/UX, state management, feature implementation, and testing.
+
+## Phase 1: Foundation & Onboarding (Weeks 1-2)
+
+### 1.1. Project Setup
+- **Task:** Initialize Flutter project with a clean architecture.
+- **Details:** Set up directory structure, dependency management (GetIt, Dio, etc.), and define core architectural patterns (e.g., BLoC, Provider).
+- **Status:** To Do
+
+### 1.2. UI Kit & Design System
+- **Task:** Develop a comprehensive UI kit based on the app's design language.
+- **Details:** Create reusable widgets for buttons, text fields, cards, dialogs, and navigation components. Define theme data (colors, typography, spacing).
+- **Status:** To Do
+
+### 1.3. Onboarding Screens
+- **Task:** Implement the multi-step onboarding process.
+- **Details:** Build the UI for all onboarding questions, including text inputs, calendars, dropdowns, and file uploads. Ensure a smooth and engaging user experience.
+- **Status:** To Do
+
+### 1.4. State Management for Onboarding
+- **Task:** Implement state management for the onboarding flow.
+- **Details:** Use a state management solution (e.g., BLoC) to handle user input, validation, and data persistence during the onboarding process.
+- **Status:** To Do
+
+### 1.5. API Integration for User Registration
+- **Task:** Connect the onboarding flow to the backend.
+- **Details:** Implement API calls to register the user and submit their onboarding data to the backend.
+- **Status:** To Do
+
+## Phase 2: Core Features (Weeks 3-4)
+
+### 2.1. Chat Interface
+- **Task:** Develop the real-time chat UI.
+- **Details:** Build a chat screen with support for text messages, timestamps, and user avatars. Implement WebSocket integration for real-time communication.
+- **Status:** To Do
+
+### 2.2. Voice Messaging
+- **Task:** Implement voice message recording and playback.
+- **Details:** Integrate a voice recording plugin to capture user audio. Develop UI components for recording, sending, and playing voice notes.
+- **Status:** To Do
+
+### 2.3. Personal Dashboard
+- **Task:** Create the main user dashboard.
+- **Details:** Design and build the dashboard UI to display key information, including a summary of the "Perfect Day," progress trackers, and quick links to other features.
+- **Status:** To Do
+
+### 2.4. Vision & Belief Boards
+- **Task:** Implement the vision and belief board features.
+- **Details:** Allow users to upload images and create text-based belief statements. Develop a visually appealing grid-based layout for the boards.
+- **Status:** To Do
+
+## Phase 3: Wellness & Engagement (Weeks 5-6)
+
+### 3.1. Journaling
+- **Task:** Develop the electronic journal feature.
+- **Details:** Create a rich-text editor for journal entries, with options for formatting and adding media. Implement local storage for offline access.
+- **Status:** To Do
+
+### 3.2. Affirmations
+- **Task:** Implement the voice affirmation feature.
+- **Details:** Allow users to record and listen to personalized affirmations. Integrate with backend to fetch AI-generated affirmations.
+- **Status:** To Do
+
+### 3.3. Daily Activity System
+- **Task:** Build the UI for the mood-based activity suggestions.
+- **Details:** Create a user-friendly interface for selecting moods and displaying recommended activities.
+- **Status:** To Do
+
+### 3.4. Push Notifications
+- **Task:** Integrate a push notification system.
+- **Details:** Set up Firebase Cloud Messaging (FCM) or a similar service to handle daily messages, reminders, and alerts.
+- **Status:** To Do
+
+## Phase 4: Refinement & Deployment (Weeks 7-8)
+
+### 4.1. Cross-Platform Optimization
+- **Task:** Ensure a consistent and high-quality experience on all platforms.
+- **Details:** Test and optimize the UI/UX for iOS, Android, and Web. Address any platform-specific issues.
+- **Status:** To Do
+
+### 4.2. Testing & Quality Assurance
+- **Task:** Conduct thorough testing of the application.
+- **Details:** Write unit, widget, and integration tests. Perform manual testing to identify and fix bugs.
+- **Status:** To Do
+
+### 4.3. App Store Deployment
+- **Task:** Prepare and submit the app to the Apple App Store and Google Play Store.
+- **Details:** Create app store listings, generate screenshots, and follow the submission guidelines for each platform.
+- **Status:** To Do
+
+### 4.4. Web Deployment
+- **Task:** Deploy the Flutter web application.
+- **Details:** Configure the web build and host it on a suitable platform (e.g., Firebase Hosting, Netlify).
+- **Status:** To Do 
