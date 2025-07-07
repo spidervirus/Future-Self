@@ -33,7 +33,7 @@ This document outlines the development plan for the Future Self backend, coverin
 
 ### 2.2. AI Personality Engine
 - **Task:** Develop the engine for the 5 AI personality modes.
-- **Details:** Create logic to dynamically adjust the AI's communication style based on user preferences and conversation context.
+- **Details:** Create logic to dynamically adjust the AI's communication style. This engine will be deeply tuned using the user's background information and onboarding responses to create a truly personalized core personality.
 - **Status:** To Do
 
 ### 2.3. Real-Time Chat
@@ -54,8 +54,8 @@ This document outlines the development plan for the Future Self backend, coverin
 - **Status:** To Do
 
 ### 3.2. External Data Integration
-- **Task:** Integrate with external APIs for additional data.
-- **Details:** Set up services to fetch data from weather, astrology/numerology, and event APIs.
+- **Task:** Integrate with external APIs for contextual data.
+- **Details:** Set up services to fetch data for AI model tuning and contextual messaging. This will include: 1. Numerology/Astrology/Zodiac data based on the user's birthday. 2. Weather and local events based on the user's geo-location, potentially using APIs or a data scraper.
 - **Status:** To Do
 
 ### 3.3. Background Jobs & Scheduler
