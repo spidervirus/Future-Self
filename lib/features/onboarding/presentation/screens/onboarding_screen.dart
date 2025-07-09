@@ -5,17 +5,71 @@ import 'package:future_self/features/onboarding/presentation/bloc/onboarding_blo
 import 'package:future_self/features/onboarding/presentation/bloc/onboarding_event.dart';
 import 'package:future_self/features/onboarding/presentation/bloc/onboarding_state.dart';
 import 'package:future_self/features/onboarding/presentation/widgets/question_page.dart';
+import 'package:future_self/core/di/service_locator.dart';
+import 'package:future_self/core/api/services/onboarding_service.dart';
 import 'package:go_router/go_router.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  late final OnboardingBloc _bloc;
+  bool _hasNavigated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = sl<OnboardingBloc>();
+    _checkOnboardingBeforeStart();
+  }
+
+  Future<void> _checkOnboardingBeforeStart() async {
+    if (!mounted) return;
+
+    try {
+      final onboardingService = OnboardingService();
+      final progress = await onboardingService.getProgress();
+
+      print(
+          '📊 Raw progress data: isComplete=${progress.isComplete}, completedSteps=${progress.completedSteps}');
+
+      if (progress.isComplete && mounted && !_hasNavigated) {
+        print('🚫 Onboarding already complete, redirecting to home');
+        _hasNavigated = true;
+        context.go('/home');
+        return;
+      }
+
+      // Only start onboarding if not complete and bloc is still active
+      if (!progress.isComplete && mounted && !_bloc.isClosed) {
+        print('▶️ Starting onboarding process');
+        _bloc.add(OnboardingStarted());
+      }
+    } catch (e) {
+      print('⚠️ Error checking onboarding status: $e');
+      // If we can't check, proceed with onboarding only if bloc is active
+      if (mounted && !_bloc.isClosed) {
+        _bloc.add(OnboardingStarted());
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => OnboardingBloc(),
+    return BlocProvider.value(
+      value: _bloc,
       child: const OnboardingView(),
     );
+  }
+
+  @override
+  void dispose() {
+    // Don't dispose the bloc here since it's managed by the service locator
+    super.dispose();
   }
 }
 
@@ -44,18 +98,38 @@ class _OnboardingViewState extends State<OnboardingView> {
       body: BlocListener<OnboardingBloc, OnboardingState>(
         listener: (context, state) {
           if (state.status == OnboardingStatus.success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Onboarding completed! Welcome to Future Self!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            print('🎉 Onboarding completed, navigating to home');
             context.go('/home');
-          }
-          if (state.currentPage != _pageController.page?.round()) {
-            _pageController.animateToPage(
-              state.currentPage,
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOut,
+          } else if (state.status == OnboardingStatus.error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage ?? 'An error occurred'),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
         child: BlocBuilder<OnboardingBloc, OnboardingState>(
           builder: (context, state) {
+            if (state.status == OnboardingStatus.loading) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Processing your onboarding...'),
+                  ],
+                ),
+              );
+            }
+
             final progress =
                 (state.currentPage + 1) / onboardingQuestions.length;
             return Column(
@@ -101,6 +175,11 @@ class _OnboardingViewState extends State<OnboardingView> {
           if (state.currentPage > 0)
             TextButton(
               onPressed: () {
+                _pageController.animateToPage(
+                  state.currentPage - 1,
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                );
                 context
                     .read<OnboardingBloc>()
                     .add(PageChanged(state.currentPage - 1));
@@ -110,6 +189,11 @@ class _OnboardingViewState extends State<OnboardingView> {
           ElevatedButton(
             onPressed: () {
               if (state.currentPage < onboardingQuestions.length - 1) {
+                _pageController.animateToPage(
+                  state.currentPage + 1,
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                );
                 context
                     .read<OnboardingBloc>()
                     .add(PageChanged(state.currentPage + 1));

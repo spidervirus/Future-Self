@@ -26,3 +26,14 @@ class AnswerUpdated extends OnboardingEvent {
 }
 
 class OnboardingSubmitted extends OnboardingEvent {}
+
+class OnboardingStarted extends OnboardingEvent {}
+
+class StepSubmitted extends OnboardingEvent {
+  final int stepNumber;
+
+  const StepSubmitted(this.stepNumber);
+
+  @override
+  List<Object> get props => [stepNumber];
+}
