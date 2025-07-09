@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../../../app/theme/cosmic_dream_theme.dart';
 import '../../../../core/di/service_locator.dart';
@@ -209,38 +211,53 @@ class _ChatScreenState extends State<ChatScreen> {
     switch (connectionState) {
       case WebSocketConnectionState.connected:
         color = Colors.green;
-        icon = Icons.wifi;
+        icon = PhosphorIcons.wifiHigh();
         tooltip = 'Real-time connected';
         break;
       case WebSocketConnectionState.connecting:
         color = Colors.orange;
-        icon = Icons.wifi_protected_setup;
+        icon = PhosphorIcons.circleNotch();
         tooltip = 'Connecting...';
         break;
       case WebSocketConnectionState.reconnecting:
         color = Colors.orange;
-        icon = Icons.refresh;
+        icon = PhosphorIcons.arrowsClockwise();
         tooltip = 'Reconnecting...';
         break;
       case WebSocketConnectionState.disconnected:
         color = Colors.grey;
-        icon = Icons.wifi_off;
+        icon = PhosphorIcons.wifiSlash();
         tooltip = 'Offline mode';
         break;
       case WebSocketConnectionState.error:
         color = Colors.red;
-        icon = Icons.error;
+        icon = PhosphorIcons.warning();
         tooltip = 'Connection error';
         break;
     }
 
+    Widget iconWidget = PhosphorIcon(
+      icon,
+      color: color,
+      size: 20,
+    );
+
+    // Add animations for certain states
+    if (connectionState == WebSocketConnectionState.connecting ||
+        connectionState == WebSocketConnectionState.reconnecting) {
+      iconWidget = iconWidget
+          .animate(onPlay: (controller) => controller.repeat())
+          .rotate(duration: 2.seconds);
+    } else if (connectionState == WebSocketConnectionState.connected) {
+      iconWidget = iconWidget
+          .animate()
+          .fadeIn(duration: 500.ms)
+          .scale(begin: Offset(0.8, 0.8), end: Offset(1.0, 1.0));
+    }
+
     return Tooltip(
       message: tooltip,
-      child: Icon(
-        icon,
-        color: color,
-        size: 20,
-      ),
+      child: iconWidget,
     );
   }
 
@@ -284,12 +301,27 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
             ),
-            child: const Icon(
-              Icons.psychology,
+            child: PhosphorIcon(
+              PhosphorIcons.brain(),
               size: 60,
               color: Colors.white,
             ),
-          ),
+          )
+              .animate(onPlay: (controller) => controller.repeat())
+              .shimmer(
+                  duration: 3.seconds, color: Colors.white.withOpacity(0.3))
+              .then()
+              .scale(
+                begin: const Offset(1.0, 1.0),
+                end: const Offset(1.1, 1.1),
+                duration: 1.seconds,
+              )
+              .then()
+              .scale(
+                begin: const Offset(1.1, 1.1),
+                end: const Offset(1.0, 1.0),
+                duration: 1.seconds,
+              ),
           const SizedBox(height: 24),
           Text(
             'Welcome to Your Future Self',
@@ -297,7 +329,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
-          ),
+          ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.3, end: 0),
           const SizedBox(height: 8),
           Text(
             'Start a conversation to get personalized guidance',
@@ -305,29 +337,36 @@ class _ChatScreenState extends State<ChatScreen> {
                   color: Colors.white70,
                 ),
             textAlign: TextAlign.center,
-          ),
+          ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.3, end: 0),
           const SizedBox(height: 32),
           ...[
             'What should I focus on today?',
             'Help me with goal setting',
             'I need motivation'
-          ].map(
-            (suggestion) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: OutlinedButton(
-                onPressed: () {
-                  _messageController.text = suggestion;
-                  _sendMessage();
-                },
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: CosmicDreamTheme.accent),
-                ),
-                child: Text(
-                  suggestion,
-                  style: const TextStyle(color: CosmicDreamTheme.accent),
-                ),
-              ),
-            ),
+          ].asMap().entries.map(
+            (entry) {
+              final index = entry.key;
+              final suggestion = entry.value;
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: OutlinedButton(
+                  onPressed: () {
+                    _messageController.text = suggestion;
+                    _sendMessage();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: CosmicDreamTheme.accent),
+                  ),
+                  child: Text(
+                    suggestion,
+                    style: const TextStyle(color: CosmicDreamTheme.accent),
+                  ),
+                )
+                    .animate()
+                    .fadeIn(delay: Duration(milliseconds: 700 + (index * 150)))
+                    .slideX(begin: 0.3, end: 0),
+              );
+            },
           ),
         ],
       ),
@@ -349,12 +388,13 @@ class _ChatScreenState extends State<ChatScreen> {
             CircleAvatar(
               radius: 16,
               backgroundColor: CosmicDreamTheme.accent,
-              child: const Icon(
-                Icons.psychology,
+              child: PhosphorIcon(
+                PhosphorIcons.brain(),
                 size: 18,
                 color: Colors.white,
               ),
-            ),
+            ).animate().fadeIn(duration: 300.ms).scale(
+                begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0)),
             const SizedBox(width: 8),
           ],
           Flexible(
@@ -394,19 +434,24 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ],
               ),
-            ),
+            ).animate().fadeIn(duration: 400.ms).slideX(
+                  begin: isUser ? 0.3 : -0.3,
+                  end: 0,
+                  curve: Curves.easeOutCubic,
+                ),
           ),
           if (isUser) ...[
             const SizedBox(width: 8),
             CircleAvatar(
               radius: 16,
               backgroundColor: CosmicDreamTheme.primary,
-              child: const Icon(
-                Icons.person,
+              child: PhosphorIcon(
+                PhosphorIcons.user(),
                 size: 18,
                 color: Colors.white,
               ),
-            ),
+            ).animate().fadeIn(duration: 300.ms).scale(
+                begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0)),
           ],
         ],
       ),
@@ -421,12 +466,14 @@ class _ChatScreenState extends State<ChatScreen> {
           CircleAvatar(
             radius: 12,
             backgroundColor: CosmicDreamTheme.accent,
-            child: const Icon(
-              Icons.psychology,
+            child: PhosphorIcon(
+              PhosphorIcons.brain(),
               size: 14,
               color: Colors.white,
             ),
-          ),
+          )
+              .animate(onPlay: (controller) => controller.repeat())
+              .shimmer(duration: 2.seconds),
           const SizedBox(width: 8),
           Text(
             indicator,
@@ -434,7 +481,11 @@ class _ChatScreenState extends State<ChatScreen> {
               color: Colors.white.withOpacity(0.7),
               fontStyle: FontStyle.italic,
             ),
-          ),
+          )
+              .animate(onPlay: (controller) => controller.repeat())
+              .fadeIn(duration: 1.seconds)
+              .then()
+              .fadeOut(duration: 1.seconds),
         ],
       ),
     );
@@ -448,12 +499,14 @@ class _ChatScreenState extends State<ChatScreen> {
           CircleAvatar(
             radius: 12,
             backgroundColor: CosmicDreamTheme.accent,
-            child: const Icon(
-              Icons.psychology,
+            child: PhosphorIcon(
+              PhosphorIcons.brain(),
               size: 14,
               color: Colors.white,
             ),
-          ),
+          )
+              .animate(onPlay: (controller) => controller.repeat())
+              .shimmer(duration: 2.seconds),
           const SizedBox(width: 8),
           const Text(
             'Future Self is thinking...',
@@ -461,7 +514,11 @@ class _ChatScreenState extends State<ChatScreen> {
               color: Colors.white70,
               fontStyle: FontStyle.italic,
             ),
-          ),
+          )
+              .animate(onPlay: (controller) => controller.repeat())
+              .fadeIn(duration: 1.seconds)
+              .then()
+              .fadeOut(duration: 1.seconds),
           const SizedBox(width: 8),
           SizedBox(
             width: 12,
@@ -470,7 +527,9 @@ class _ChatScreenState extends State<ChatScreen> {
               strokeWidth: 2,
               color: CosmicDreamTheme.accent,
             ),
-          ),
+          )
+              .animate(onPlay: (controller) => controller.repeat())
+              .rotate(duration: 1.seconds),
         ],
       ),
     );
@@ -529,12 +588,26 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               child: IconButton(
                 onPressed: _sendMessage,
-                icon: const Icon(
-                  Icons.send,
+                icon: PhosphorIcon(
+                  PhosphorIcons.paperPlaneTilt(),
                   color: Colors.white,
                 ),
               ),
-            ),
+            )
+                .animate()
+                .scale(
+                  begin: const Offset(1.0, 1.0),
+                  end: const Offset(1.1, 1.1),
+                  duration: 200.ms,
+                  curve: Curves.easeInOut,
+                )
+                .then()
+                .scale(
+                  begin: const Offset(1.1, 1.1),
+                  end: const Offset(1.0, 1.0),
+                  duration: 200.ms,
+                  curve: Curves.easeInOut,
+                ),
           ],
         ),
       ),

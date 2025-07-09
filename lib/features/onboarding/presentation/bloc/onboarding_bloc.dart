@@ -3,6 +3,8 @@ import 'package:future_self/core/api/services/onboarding_service.dart';
 import 'package:future_self/core/api/models/onboarding_models.dart';
 import 'package:future_self/features/onboarding/presentation/bloc/onboarding_event.dart';
 import 'package:future_self/features/onboarding/presentation/bloc/onboarding_state.dart';
+import 'package:future_self/features/onboarding/domain/entities/onboarding_question.dart';
+import 'package:future_self/features/onboarding/domain/entities/onboarding_data.dart';
 
 class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   final OnboardingService _onboardingService;
@@ -14,6 +16,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     on<AnswerUpdated>(_onAnswerUpdated);
     on<OnboardingSubmitted>(_onOnboardingSubmitted);
     on<OnboardingStarted>(_onOnboardingStarted);
+    on<OnboardingDataLoaded>(_onOnboardingDataLoaded);
     on<StepSubmitted>(_onStepSubmitted);
   }
 
@@ -21,7 +24,8 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     emit(state.copyWith(currentPage: event.pageIndex));
   }
 
-  void _onAnswerUpdated(AnswerUpdated event, Emitter<OnboardingState> emit) {
+  void _onAnswerUpdated(
+      AnswerUpdated event, Emitter<OnboardingState> emit) async {
     final key = event.answer.keys.first;
     final value = event.answer.values.first;
     var currentData = state.onboardingData;
@@ -31,7 +35,17 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
         currentData = currentData.copyWith(name: value);
         break;
       case 'birthday':
-        currentData = currentData.copyWith(birthday: value);
+        DateTime? parsedBirthday;
+        if (value != null && value.isNotEmpty) {
+          try {
+            // Try to parse as ISO date first
+            parsedBirthday = DateTime.parse(value);
+          } catch (e) {
+            // If parsing fails, leave it as null
+            parsedBirthday = null;
+          }
+        }
+        currentData = currentData.copyWith(birthday: parsedBirthday);
         break;
       case 'culture':
         currentData = currentData.copyWith(culture: value);
@@ -90,6 +104,19 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     }
 
     emit(state.copyWith(onboardingData: currentData));
+
+    // Auto-save: Immediately save the updated data to the backend
+    try {
+      final stepNumber = _getStepNumberForField(key);
+      final stepData = _getStepData(stepNumber);
+      if (stepData.isNotEmpty) {
+        final mappedData = OnboardingFieldMapper.mapToBackendFields(stepData);
+        await _onboardingService.updateStep(stepNumber, mappedData);
+      }
+    } catch (e) {
+      // Don't emit error state for auto-save failures, just log it
+      print('Auto-save failed for field $key: $e');
+    }
   }
 
   void _onOnboardingStarted(
@@ -104,6 +131,99 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
         status: OnboardingStatus.error,
         errorMessage: e.toString(),
       ));
+    }
+  }
+
+  void _onOnboardingDataLoaded(
+      OnboardingDataLoaded event, Emitter<OnboardingState> emit) async {
+    emit(state.copyWith(status: OnboardingStatus.loading));
+
+    try {
+      // Load existing onboarding data
+      final onboardingData = await _onboardingService.loadOnboardingData();
+      
+      // Get progress to determine current page
+      final progress = await _onboardingService.getProgress();
+      
+      // Calculate the current page based on completed steps
+      int currentPage = _calculateCurrentPageFromProgress(onboardingData);
+      
+      emit(state.copyWith(
+        onboardingData: onboardingData,
+        currentPage: currentPage,
+        status: OnboardingStatus.inProgress,
+      ));
+    } catch (e) {
+      // If loading fails, start with empty data
+      emit(state.copyWith(
+        status: OnboardingStatus.inProgress,
+        currentPage: 0,
+      ));
+    }
+  }
+
+  /// Calculate current page based on onboarding data completeness
+  int _calculateCurrentPageFromProgress(OnboardingData data) {
+    // Find the first incomplete question
+    for (int i = 0; i < onboardingQuestions.length; i++) {
+      final question = onboardingQuestions[i];
+      final answer = _getAnswerForQuestion(data, question.key);
+      
+      // If this question is not answered, this is where we should start
+      if (answer == null || answer.isEmpty) {
+        return i;
+      }
+    }
+    
+    // If all questions are answered, go to the last page
+    return onboardingQuestions.length - 1;
+  }
+
+  /// Get answer value for a specific question key from OnboardingData
+  String? _getAnswerForQuestion(OnboardingData data, String key) {
+    switch (key) {
+      case 'name':
+        return data.name;
+      case 'birthday':
+        return data.birthday?.toIso8601String();
+      case 'culture':
+        return data.culture;
+      case 'location':
+        return data.location;
+      case 'mindState':
+        return data.mindState;
+      case 'selfPerception':
+        return data.selfPerception;
+      case 'selfLike':
+        return data.selfLike;
+      case 'pickMeUp':
+        return data.pickMeUp;
+      case 'stuckPattern':
+        return data.stuckPattern;
+      case 'desiredFeeling':
+        return data.desiredFeeling;
+      case 'futureSelfVision':
+        return data.futureSelfVision;
+      case 'futureSelfAge':
+        return data.futureSelfAge?.toString();
+      case 'dreamDay':
+        return data.dreamDay;
+      case 'ambition':
+        return data.ambition;
+      case 'photoPath':
+        return data.photoPath;
+      case 'trustedVibes':
+        return data.trustedVibes;
+      case 'messageLength':
+        return data.messageLength;
+      case 'messageFrequency':
+        return data.messageFrequency;
+      case 'personalityFlair':
+        return data.personalityFlair;
+      case 'lostCoping':
+        return data.lostCoping;
+      default:
+        return null;
     }
   }
 
@@ -144,6 +264,52 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
         status: OnboardingStatus.error,
         errorMessage: 'Failed to complete onboarding: ${e.toString()}',
       ));
+    }
+  }
+
+  /// Get step number for a specific field
+  int _getStepNumberForField(String fieldKey) {
+    switch (fieldKey) {
+      // Step 1: Let Me Meet You
+      case 'name':
+      case 'birthday':
+      case 'culture':
+      case 'location':
+        return 1;
+
+      // Step 2: Tell Me More About You
+      case 'mindState':
+      case 'selfPerception':
+      case 'selfLike':
+      case 'pickMeUp':
+        return 2;
+
+      // Step 3: Moving from A to B
+      case 'stuckPattern':
+      case 'desiredFeeling':
+      case 'futureSelfVision':
+        return 3;
+
+      // Step 4: Tell Me About Your Future Self
+      case 'futureSelfAge':
+      case 'dreamDay':
+      case 'ambition':
+      case 'photoPath':
+        return 4;
+
+      // Step 5: Communication Style Preferences
+      case 'trustedVibes':
+      case 'messageLength':
+      case 'messageFrequency':
+      case 'personalityFlair':
+        return 5;
+
+      // Step 6: Additional Context
+      case 'lostCoping':
+        return 6;
+
+      default:
+        return 1; // Default to step 1 if field is not recognized
     }
   }
 

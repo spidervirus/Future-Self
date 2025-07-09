@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+
 import '../../bloc/auth_bloc.dart';
-import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
+import '../../bloc/auth_event.dart';
 import '../../../../core/di/service_locator.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -54,15 +57,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 40),
                 _buildHeader(theme),
                 const SizedBox(height: 48),
-                _buildLoginForm(theme),
+                _buildLoginForm(theme)
+                    .animate()
+                    .fadeIn(delay: 700.ms)
+                    .slideY(begin: 0.3, end: 0, curve: Curves.easeOutCubic),
                 const SizedBox(height: 32),
-                _buildLoginButton(),
+                _buildLoginButton()
+                    .animate()
+                    .fadeIn(delay: 900.ms)
+                    .slideY(begin: 0.3, end: 0, curve: Curves.easeOutCubic),
                 const SizedBox(height: 16),
-                _buildForgotPassword(theme),
+                _buildForgotPassword(theme)
+                    .animate()
+                    .fadeIn(delay: 1100.ms)
+                    .slideY(begin: 0.3, end: 0, curve: Curves.easeOutCubic),
                 const SizedBox(height: 32),
-                _buildDivider(theme),
+                _buildDivider(theme)
+                    .animate()
+                    .fadeIn(delay: 1300.ms)
+                    .slideY(begin: 0.3, end: 0, curve: Curves.easeOutCubic),
                 const SizedBox(height: 32),
-                _buildSignUpPrompt(theme),
+                _buildSignUpPrompt(theme)
+                    .animate()
+                    .fadeIn(delay: 1500.ms)
+                    .slideY(begin: 0.3, end: 0, curve: Curves.easeOutCubic),
               ],
             ),
           ),
@@ -86,12 +104,26 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            Icons.auto_awesome,
+          child: PhosphorIcon(
+            PhosphorIcons.sparkle(),
             size: 40,
             color: theme.colorScheme.onPrimary,
           ),
-        ),
+        )
+            .animate(onPlay: (controller) => controller.repeat())
+            .shimmer(duration: 3.seconds, color: Colors.white.withOpacity(0.3))
+            .then()
+            .scale(
+              begin: const Offset(1.0, 1.0),
+              end: const Offset(1.1, 1.1),
+              duration: 1.seconds,
+            )
+            .then()
+            .scale(
+              begin: const Offset(1.1, 1.1),
+              end: const Offset(1.0, 1.0),
+              duration: 1.seconds,
+            ),
         const SizedBox(height: 24),
         Text(
           'Welcome Back',
@@ -99,14 +131,20 @@ class _LoginScreenState extends State<LoginScreen> {
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.primary,
           ),
-        ),
+        )
+            .animate()
+            .fadeIn(delay: 300.ms)
+            .slideY(begin: 0.3, end: 0, curve: Curves.easeOutCubic),
         const SizedBox(height: 8),
         Text(
           'Connect with your Future Self',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
-        ),
+        )
+            .animate()
+            .fadeIn(delay: 500.ms)
+            .slideY(begin: 0.3, end: 0, curve: Curves.easeOutCubic),
       ],
     );
   }
@@ -121,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               labelText: 'Email',
-              prefixIcon: const Icon(Icons.email_outlined),
+              prefixIcon: PhosphorIcon(PhosphorIcons.envelope()),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -143,10 +181,10 @@ class _LoginScreenState extends State<LoginScreen> {
             obscureText: !_isPasswordVisible,
             decoration: InputDecoration(
               labelText: 'Password',
-              prefixIcon: const Icon(Icons.lock_outlined),
+              prefixIcon: PhosphorIcon(PhosphorIcons.lock()),
               suffixIcon: IconButton(
-                icon: Icon(
-                  _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                icon: PhosphorIcon(
+                  _isPasswordVisible ? PhosphorIcons.eyeSlash() : PhosphorIcons.eye(),
                 ),
                 onPressed: () {
                   setState(() {

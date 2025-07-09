@@ -50,10 +50,12 @@ async def register(
         )
     except Exception as e:
         # Log the actual error for debugging
+        import traceback
         print(f"Registration error: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Registration failed"
+            detail=f"Registration failed: {str(e)}"
         )
 
 
@@ -79,10 +81,12 @@ async def login(
         )
     except Exception as e:
         # Log the actual error for debugging
+        import traceback
         print(f"Login error: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Login failed"
+            detail=f"Login failed: {str(e)}"
         )
 
 
@@ -161,6 +165,16 @@ async def request_password_reset(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Password reset request failed"
         )
+
+
+# Add alias for frontend compatibility
+@router.post("/forgot-password")
+async def forgot_password_alias(
+    password_reset: PasswordReset,
+    db: Session = Depends(get_db)
+):
+    """Request password reset (alias for frontend compatibility)"""
+    return await request_password_reset(password_reset, db)
 
 
 @router.post("/password-reset-confirm")

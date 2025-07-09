@@ -15,6 +15,7 @@ class User(BaseModel):
     email = Column(String(255), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=False)
+    phone_number = Column(String(20), nullable=True)
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
     verification_token = Column(String(255), nullable=True)
@@ -43,6 +44,7 @@ class User(BaseModel):
             "id": str(self.id),
             "email": self.email,
             "full_name": self.full_name,
+            "phone_number": self.phone_number,
             "is_active": self.is_active,
             "is_verified": self.is_verified,
             "last_login": self.last_login.isoformat() if self.last_login else None,

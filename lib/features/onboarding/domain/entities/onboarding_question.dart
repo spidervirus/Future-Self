@@ -1,4 +1,4 @@
-enum QuestionType { text, date, dropdown, image }
+enum QuestionType { text, date, dropdown, image, country }
 
 class OnboardingQuestion {
   final String key;
@@ -23,9 +23,12 @@ final List<OnboardingQuestion> onboardingQuestions = [
       type: QuestionType.date),
   OnboardingQuestion(
       key: 'culture',
-      questionText: "What country or culture feels most like 'home' to you?"),
+      questionText: "What country or culture feels most like 'home' to you?",
+      type: QuestionType.country),
   OnboardingQuestion(
-      key: 'location', questionText: "Where in the world are you right now?"),
+      key: 'location',
+      questionText: "Where in the world are you right now?",
+      type: QuestionType.country),
 
   // Section B: Tell Me More About You
   OnboardingQuestion(

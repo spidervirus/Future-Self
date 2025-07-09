@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../api_client.dart';
 import '../models/onboarding_models.dart';
+import '../../../features/onboarding/domain/entities/onboarding_data.dart';
 
 class OnboardingService {
   final ApiClient _apiClient;
@@ -160,6 +161,50 @@ class OnboardingService {
       // If there's an error getting progress, assume onboarding is not complete
       return false;
     }
+  }
+
+  /// Load existing onboarding data and convert it to OnboardingData format
+  Future<OnboardingData> loadOnboardingData() async {
+    try {
+      final onboardingDataResponse = await getOnboardingData();
+      // Convert the API response back to OnboardingData format
+      return _convertApiResponseToOnboardingData(onboardingDataResponse);
+    } catch (e) {
+      // If there's an error or no existing data, return initial empty data
+      return _createEmptyOnboardingData();
+    }
+  }
+
+  /// Convert API response to OnboardingData format
+  OnboardingData _convertApiResponseToOnboardingData(
+      OnboardingDataResponse response) {
+    return OnboardingData(
+      name: response.name,
+      birthday: response.birthday,
+      culture: response.culturalHome,
+      location: response.currentLocation,
+      mindState: response.currentThoughts,
+      selfPerception: response.authenticPlace,
+      selfLike: response.somethingYouLike,
+      pickMeUp: response.reminderWhenDown,
+      stuckPattern: response.changeYouWant,
+      desiredFeeling: response.feelingToExperience,
+      futureSelfVision: response.personYouWantToBe,
+      futureSelfAge: response.futureSelfAge,
+      dreamDay: response.dreamDay,
+      ambition: response.accomplishmentGoal,
+      photoPath: response.futureSelfPhotoUrl,
+      trustedVibes: response.trustedWordsVibes,
+      messageLength: response.messageLengthPreference,
+      messageFrequency: response.messageFrequency,
+      personalityFlair: response.trustFactor,
+      lostCoping: response.whenFeelingLost,
+    );
+  }
+
+  /// Create empty onboarding data structure
+  OnboardingData _createEmptyOnboardingData() {
+    return OnboardingData();
   }
 
   /// Handle API errors consistently

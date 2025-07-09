@@ -11,6 +11,7 @@ CREATE TABLE public.users (
     email VARCHAR(255) UNIQUE NOT NULL,
     hashed_password VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(20),
     is_active BOOLEAN DEFAULT TRUE,
     is_verified BOOLEAN DEFAULT FALSE,
     verification_token VARCHAR(255),

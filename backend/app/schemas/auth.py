@@ -8,11 +8,13 @@ class UserBase(BaseModel):
     """Base user schema with common fields"""
     email: EmailStr
     full_name: str = Field(..., min_length=1, max_length=255)
+    phone_number: Optional[str] = Field(None, max_length=20)
 
 
 class UserCreate(UserBase):
     """Schema for user registration"""
     password: str = Field(..., min_length=8, max_length=100)
+    phone_number: Optional[str] = Field(None, max_length=20)
     
     @validator('password')
     def validate_password(cls, v):

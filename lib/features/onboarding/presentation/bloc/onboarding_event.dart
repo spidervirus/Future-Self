@@ -29,6 +29,8 @@ class OnboardingSubmitted extends OnboardingEvent {}
 
 class OnboardingStarted extends OnboardingEvent {}
 
+class OnboardingDataLoaded extends OnboardingEvent {}
+
 class StepSubmitted extends OnboardingEvent {
   final int stepNumber;
 

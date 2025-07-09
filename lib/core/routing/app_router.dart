@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:future_self/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:future_self/features/onboarding/presentation/screens/bubble_onboarding_screen.dart';
 import 'package:future_self/features/home/presentation/screens/home_screen.dart';
 import 'package:future_self/features/chat/presentation/screens/chat_screen.dart';
 import 'package:future_self/features/journal/presentation/screens/journal_screen.dart';
@@ -48,7 +48,7 @@ final GoRouter router = GoRouter(
       path: '/onboarding',
       builder: (BuildContext context, GoRouterState state) {
         return AuthWrapper(
-          child: const OnboardingScreen(),
+          child: const BubbleOnboardingScreen(),
         );
       },
     ),

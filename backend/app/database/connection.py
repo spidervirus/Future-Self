@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
 from supabase import create_client, Client
 import logging
 
@@ -56,8 +55,10 @@ def init_database():
             database_url = get_database_url()
             engine = create_engine(
                 database_url,
-                poolclass=StaticPool,
-                pool_pre_ping=True,
+                pool_size=20,
+                max_overflow=0,
+                pool_recycle=3600,
+                pool_pre_ping=False,
                 echo=settings.DEBUG,  # Log SQL queries in debug mode
             )
             
@@ -73,7 +74,6 @@ def init_database():
             # Use SQLite in-memory database for testing
             engine = create_engine(
                 "sqlite:///:memory:",
-                poolclass=StaticPool,
                 echo=settings.DEBUG,
                 connect_args={"check_same_thread": False},
             )

@@ -90,6 +90,7 @@ class AuthService:
         user = User(
             email=user_create.email,
             full_name=user_create.full_name,
+            phone_number=user_create.phone_number,
             hashed_password=hashed_password,
             verification_token=secrets.token_urlsafe(32)
         )
